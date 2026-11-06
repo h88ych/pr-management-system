@@ -4,6 +4,6 @@ export class AppError extends Error {
     message: string
   ) {
     super(message)
-    this.name = 'PRException'
+    this.name = 'AppError'
   }
 }
