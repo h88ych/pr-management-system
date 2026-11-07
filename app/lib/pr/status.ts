@@ -4,6 +4,8 @@ export type PRStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED'
 export type PRAction = 'SUBMIT' | 'APPROVE' | 'REJECT'
 export type Role = 'REQUESTER' | 'APPROVER'
 
+export const STATUSES: PRStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED']
+
 const transitions: Record<PRStatus, Partial<Record<PRAction, PRStatus>>> = {
   DRAFT: { SUBMIT: 'PENDING' },
   PENDING: { APPROVE: 'APPROVED', REJECT: 'REJECTED' },
