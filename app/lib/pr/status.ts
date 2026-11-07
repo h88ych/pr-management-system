@@ -1,0 +1,25 @@
+import { AppError } from './error'
+
+export type PRStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED'
+export type PRAction = 'SUBMIT' | 'APPROVE' | 'REJECT'
+
+const transitions: Record<PRStatus, Partial<Record<PRAction, PRStatus>>> = {
+  DRAFT: { SUBMIT: 'PENDING' },
+  PENDING: { APPROVE: 'APPROVED', REJECT: 'REJECTED' },
+  APPROVED: {},
+  REJECTED: {}
+}
+
+export function getNextStatus(
+  currentStatus: PRStatus,
+  action: PRAction
+): PRStatus | null {
+  const nextStatus = transitions[currentStatus]?.[action]
+  if (!nextStatus) {
+    throw new AppError(
+      400,
+      `Invalid action '${action}' for status '${currentStatus}'`
+    )
+  }
+  return nextStatus ?? null
+}
