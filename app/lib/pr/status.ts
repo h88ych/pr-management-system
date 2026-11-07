@@ -2,6 +2,7 @@ import { AppError } from './error'
 
 export type PRStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED'
 export type PRAction = 'SUBMIT' | 'APPROVE' | 'REJECT'
+export type Role = 'REQUESTER' | 'APPROVER'
 
 const transitions: Record<PRStatus, Partial<Record<PRAction, PRStatus>>> = {
   DRAFT: { SUBMIT: 'PENDING' },
@@ -22,4 +23,14 @@ export function getNextStatus(
     )
   }
   return nextStatus ?? null
+}
+
+export function canEdit(status: PRStatus): boolean {
+  return status === 'DRAFT'
+}
+
+export function confirmRole(user: { role: string }, requiredRole: Role): void {
+  if (user.role !== requiredRole) {
+    throw new AppError(403, `ต้องเป็น ${requiredRole} เท่านั้น`)
+  }
 }

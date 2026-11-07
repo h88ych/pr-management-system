@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getNextStatus } from './status'
+import { canEdit, getNextStatus } from './status'
 
 describe('getNextStatus', () => {
   it('DRAFT + SUBMIT -> PENDING', () => {
@@ -16,5 +16,18 @@ describe('getNextStatus', () => {
   })
   it('APPROVED เป็นสถานะสุดท้าย', () => {
     expect(() => getNextStatus('APPROVED', 'SUBMIT')).toThrow()
+  })
+})
+
+describe('canEdit', () => {
+  it('DRAFT แก้ได้', () => {
+    expect(canEdit('DRAFT')).toBe(true)
+  })
+  it('PENDING แก้ไม่ได้', () => {
+    expect(canEdit('PENDING')).toBe(false)
+  })
+  it('APPROVED, REJECTED แก้ไม่ได้', () => {
+    expect(canEdit('APPROVED')).toBe(false)
+    expect(canEdit('REJECTED')).toBe(false)
   })
 })
