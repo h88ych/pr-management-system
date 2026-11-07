@@ -20,7 +20,7 @@ export function getNextStatus(
   const nextStatus = transitions[currentStatus]?.[action]
   if (!nextStatus) {
     throw new AppError(
-      400,
+      409,
       `Invalid action '${action}' for status '${currentStatus}'`
     )
   }
