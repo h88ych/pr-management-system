@@ -13,8 +13,7 @@
 
 ```bash
 npm install
-cp .env.example .env
-npm run setup     # สร้างฐานข้อมูล + ใส่ข้อมูลตัวอย่าง
+npm run setup
 npm run dev
 ```
 
