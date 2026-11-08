@@ -19,7 +19,7 @@ async function findPurchaseRequest(id: number) {
   return pr
 }
 
-function confirmOwner(user: User, pr: { requesterName: String }) {
+function confirmOwner(user: User, pr: { requesterName: string }) {
   if (user.role !== 'REQUESTER' || pr.requesterName !== user.name) {
     throw new AppError(403, 'เฉพาะผู้ขอที่เป็นเจ้าของ PR เท่านั้น')
   }
@@ -71,13 +71,20 @@ export async function updatePR(
     throw new AppError(409, 'แก้ไขได้เฉพาะ PR ที่เป็น Draft')
   }
   const items = validateItems(body.items)
-  return prisma.purchaseRequest.update({
-    where: { id },
-    data: {
-      ...calcTotals(items),
-      items: { deleteMany: {}, create: items }
-    },
-    include
+  return prisma.$transaction(async (tx) => {
+    // เช็กสถานะซ้ำใน DB ตอนเขียน กัน race condition (เช่น มีคนกดส่งอนุมัติไประหว่างนั้น)
+    const res = await tx.purchaseRequest.updateMany({
+      where: { id, status: 'DRAFT' },
+      data: calcTotals(items)
+    })
+    if (res.count === 0) {
+      throw new AppError(409, 'แก้ไขได้เฉพาะ PR ที่เป็น Draft')
+    }
+    await tx.purchaseRequestItem.deleteMany({ where: { prId: id } })
+    await tx.purchaseRequestItem.createMany({
+      data: items.map((i) => ({ ...i, prId: id }))
+    })
+    return tx.purchaseRequest.findUniqueOrThrow({ where: { id }, include })
   })
 }
 
@@ -87,7 +94,10 @@ export async function deletePR(user: User, id: number) {
   if (!canEdit(pr.status as PRStatus)) {
     throw new AppError(409, 'ลบได้เฉพาะ PR ที่เป็น Draft')
   }
-  await prisma.purchaseRequest.delete({ where: { id } })
+  const res = await prisma.purchaseRequest.deleteMany({
+    where: { id, status: 'DRAFT' }
+  })
+  if (res.count === 0) throw new AppError(409, 'ลบได้เฉพาะ PR ที่เป็น Draft')
   return { ok: true }
 }
 
@@ -99,11 +109,14 @@ async function transition(
   const pr = await findPurchaseRequest(id)
   const status = getNextStatus(pr.status as PRStatus, action)
   if (status === null) throw new AppError(409, 'ไม่สามารถเปลี่ยนสถานะ PR ได้')
-  return prisma.purchaseRequest.update({
-    where: { id },
-    data: { status, ...extra },
-    include
+  const res = await prisma.purchaseRequest.updateMany({
+    where: { id, status: pr.status },
+    data: { status, ...extra }
   })
+  if (res.count === 0) {
+    throw new AppError(409, 'สถานะ PR ถูกเปลี่ยนไปแล้ว กรุณารีเฟรชหน้า')
+  }
+  return findPurchaseRequest(id)
 }
 
 export async function submitPR(user: User, id: number) {
