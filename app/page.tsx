@@ -1,95 +1,68 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useUsers } from '@/lib/client/useUsers'
+import { api, baht, STATUS_TEXT, type PR } from '@/lib/client/api'
+import UserSwitcher from './components/UserSwitcher'
 
-export default function Home() {
+export default function PRListPage() {
+  const { users, user, setUserId } = useUsers()
+  const [status, setStatus] = useState('')
+  const [list, setList] = useState<PR[]>([])
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!user) return
+    setError('')
+    const q = status ? `?status=${status}` : ''
+    api<PR[]>(`/api/prs${q}`, user.id)
+      .then(setList)
+      .catch((e) => setError(e.message))
+  }, [user?.id, status])
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main>
+      <UserSwitcher users={users} user={user} onChange={setUserId} />
+      <h1>รายการใบขอซื้อ (PR)</h1>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      <p>
+        สถานะ:{' '}
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="">ทั้งหมด</option>
+          {Object.entries(STATUS_TEXT).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>{' '}
+        {user?.role === 'REQUESTER' && <Link href="/prs/new">[+ สร้าง PR]</Link>}
+      </p>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <table border={1} cellPadding={6}>
+        <thead>
+          <tr>
+            <th>เลขที่</th>
+            <th>ผู้ขอ</th>
+            <th>ยอดรวม (บาท)</th>
+            <th>สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((p) => (
+            <tr key={p.id}>
+              <td><Link href={`/prs/${p.id}`}>{p.prNumber}</Link></td>
+              <td>{p.requesterName}</td>
+              <td align="right">{baht(p.total)}</td>
+              <td>{STATUS_TEXT[p.status]}</td>
+            </tr>
+          ))}
+          {list.length === 0 && (
+            <tr>
+              <td colSpan={4}>ไม่มีรายการ</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </main>
+  )
 }
