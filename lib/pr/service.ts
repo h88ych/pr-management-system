@@ -72,7 +72,6 @@ export async function updatePR(
   }
   const items = validateItems(body.items)
   return prisma.$transaction(async (tx) => {
-    // เช็กสถานะซ้ำใน DB ตอนเขียน กัน race condition (เช่น มีคนกดส่งอนุมัติไประหว่างนั้น)
     const res = await tx.purchaseRequest.updateMany({
       where: { id, status: 'DRAFT' },
       data: calcTotals(items)

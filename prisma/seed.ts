@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client/edge';
+import { PrismaClient } from '@prisma/client';
 import { calcTotals } from '../lib/pr/calculator'
 
 const prisma = new PrismaClient()
@@ -29,7 +29,6 @@ async function createPR(
 }
 
 async function main() {
-  // ล้างข้อมูลเดิมแล้วสร้างใหม่ รัน seed ซ้ำได้โดยข้อมูลไม่ซ้ำซ้อน
   await prisma.purchaseRequestItem.deleteMany()
   await prisma.purchaseRequest.deleteMany()
   await prisma.user.deleteMany()

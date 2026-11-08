@@ -24,7 +24,7 @@ describe('calcTotals', () => {
   })
 
   it('หลายรายการ: ปัดเศษ VAT ที่ยอดรวม ไม่ปัดทีละรายการ', () => {
-    // 3 x 21 สตางค์ = 63 -> vat 4.41 -> 4 (ถ้าปัดทีละบรรทัดจะได้ 3)
+
     const r = calcTotals([
       { quantity: 1, unitPrice: 21 },
       { quantity: 1, unitPrice: 21 },
