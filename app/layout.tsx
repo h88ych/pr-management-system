@@ -1,3 +1,5 @@
+import './globals.css'
+
 export const metadata = {
   title: 'ระบบใบขอซื้อ (PR)',
   description: 'Purchase Request management system',
