@@ -22,21 +22,21 @@ npm run dev
 
 คำสั่งอื่นที่ใช้บ่อย
 
-| คำสั่ง | ทำอะไร |
-| --- | --- |
-| `npm test` | รัน unit test (การคำนวณเงิน และการเปลี่ยนสถานะ) |
-| `npm run setup` | รีเซ็ตฐานข้อมูลกลับเป็นข้อมูลตัวอย่าง (รันซ้ำได้ ข้อมูลเดิมจะถูกล้าง) |
-| `npm run build` / `npm start` | build และรันแบบ production |
+| คำสั่ง                        | ทำอะไร                                                                |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `npm test`                    | รัน unit test (การคำนวณเงิน และการเปลี่ยนสถานะ)                       |
+| `npm run setup`               | รีเซ็ตฐานข้อมูลกลับเป็นข้อมูลตัวอย่าง (รันซ้ำได้ ข้อมูลเดิมจะถูกล้าง) |
+| `npm run build` / `npm start` | build และรันแบบ production                                            |
 
 ## วิธีใช้งานเบื้องต้น
 
 ระบบไม่มี login ให้เลือกผู้ใช้จาก dropdown มุมขวาบนของทุกหน้า ผู้ใช้ตัวอย่างจาก seed มี 3 คน
 
-| ชื่อ | Role | แผนก |
-| --- | --- | --- |
-| สมชาย ใจดี | Requester | IT |
-| สมหญิง รักงาน | Requester | Marketing |
-| วิชัย อนุมัติ | Approver | Management |
+| ชื่อ          | Role      | แผนก       |
+| ------------- | --------- | ---------- |
+| สมชาย ใจดี    | Requester | IT         |
+| สมหญิง รักงาน | Requester | Marketing  |
+| วิชัย อนุมัติ | Approver  | Management |
 
 ลำดับการใช้งาน
 
@@ -50,17 +50,41 @@ npm run dev
 
 ## Screenshot
 
+### มุมมอง Requester
+
 หน้ารายการ PR
 
-![หน้ารายการ PR](docs/screenshots/pr-list.png)
+![หน้ารายการ PR](docs/screenshots/requester/pr-list.png)
 
-หน้ารายละเอียด PR (สร้าง / แก้ไข)
+สร้าง PR
 
-![หน้ารายละเอียด PR ขณะแก้ไข](docs/screenshots/pr-detail-edit.png)
+![สร้าง PR](docs/screenshots/requester/pr-create-request.png)
 
-หน้ารายละเอียด PR ในมุมมอง Approver
+แก้ไข PR (ฉบับร่าง)
 
-![หน้ารายละเอียด PR ของ Approver](docs/screenshots/pr-detail-approver.png)
+![แก้ไข PR](docs/screenshots/requester/pr-edit-request.png)
+
+PR ที่ส่งอนุมัติแล้ว รอผู้อนุมัติ
+
+![PR รออนุมัติ](docs/screenshots/requester/pr-requester-waiting-for-approve.png)
+
+### มุมมอง Approver
+
+หน้ารายการ PR ที่รออนุมัติ
+
+![รายการ PR ที่รออนุมัติ](docs/screenshots/approver/pr-wating-list.png)
+
+หน้ารายละเอียด PR พร้อมปุ่มอนุมัติ / Reject
+
+![รายละเอียด PR ของ Approver](docs/screenshots/approver/pr-detail-approve.png)
+
+หลังกดอนุมัติ
+
+![อนุมัติ PR](docs/screenshots/approver/pr-approve.png)
+
+หน้ารายการหลังอนุมัติ
+
+![รายการ PR หลังอนุมัติ](docs/screenshots/approver/pr-approve-list.png)
 
 ## ER Diagram
 
@@ -78,17 +102,17 @@ npm run dev
 
 ทุก request ต้องส่ง header `x-user-id` (id ของผู้ใช้ที่เลือกจาก dropdown)
 
-| Method | Path | ใครทำได้ | หมายเหตุ |
-| --- | --- | --- | --- |
-| GET | `/api/users` | ทุกคน | ใช้กับ dropdown เลือกผู้ใช้ |
-| GET | `/api/prs?status=PENDING` | ทุก role | `status` ไม่ใส่ = ทั้งหมด |
-| POST | `/api/prs` | Requester | สร้าง PR สถานะ DRAFT |
-| GET | `/api/prs/:id` | ทุก role | พร้อมรายการสินค้า |
-| PUT | `/api/prs/:id` | เจ้าของ PR | เฉพาะ DRAFT |
-| DELETE | `/api/prs/:id` | เจ้าของ PR | เฉพาะ DRAFT |
-| POST | `/api/prs/:id/submit` | เจ้าของ PR | DRAFT → PENDING |
-| POST | `/api/prs/:id/approve` | Approver | PENDING → APPROVED |
-| POST | `/api/prs/:id/reject` | Approver | PENDING → REJECTED, body `{ "reason": "..." }` |
+| Method | Path                      | ใครทำได้   | หมายเหตุ                                       |
+| ------ | ------------------------- | ---------- | ---------------------------------------------- |
+| GET    | `/api/users`              | ทุกคน      | ใช้กับ dropdown เลือกผู้ใช้                    |
+| GET    | `/api/prs?status=PENDING` | ทุก role   | `status` ไม่ใส่ = ทั้งหมด                      |
+| POST   | `/api/prs`                | Requester  | สร้าง PR สถานะ DRAFT                           |
+| GET    | `/api/prs/:id`            | ทุก role   | พร้อมรายการสินค้า                              |
+| PUT    | `/api/prs/:id`            | เจ้าของ PR | เฉพาะ DRAFT                                    |
+| DELETE | `/api/prs/:id`            | เจ้าของ PR | เฉพาะ DRAFT                                    |
+| POST   | `/api/prs/:id/submit`     | เจ้าของ PR | DRAFT → PENDING                                |
+| POST   | `/api/prs/:id/approve`    | Approver   | PENDING → APPROVED                             |
+| POST   | `/api/prs/:id/reject`     | Approver   | PENDING → REJECTED, body `{ "reason": "..." }` |
 
 กรณีผิดกฎ API ตอบ 400 (ข้อมูลไม่ถูกต้อง), 401 (ไม่พบผู้ใช้), 403 (ไม่มีสิทธิ์), 404 (ไม่พบ PR), 409 (สถานะไม่ถูกต้อง)
 
