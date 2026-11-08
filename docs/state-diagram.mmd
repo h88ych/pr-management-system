@@ -1,0 +1,23 @@
+stateDiagram-v2
+    direction LR
+    [*] --> DRAFT : สร้าง PR
+    DRAFT --> PENDING : SUBMIT
+    PENDING --> APPROVED : APPROVE
+    PENDING --> REJECTED : REJECT
+
+    note left of DRAFT
+        Requester เจ้าของ PR
+        แก้ไข / ลบ / ส่งอนุมัติได้
+    end note
+    note right of PENDING
+        Approver เท่านั้น
+        reject ต้องระบุเหตุผล
+    end note
+    note right of APPROVED
+        สถานะสุดท้าย
+        ห้ามแก้ไข ลบ หรือเปลี่ยนสถานะ
+    end note
+    note right of REJECTED
+        สถานะสุดท้าย
+        เก็บเหตุผลใน rejectReason
+    end note

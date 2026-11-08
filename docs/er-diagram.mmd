@@ -1,0 +1,32 @@
+erDiagram
+    USER {
+        int id PK
+        string name
+        string role "REQUESTER | APPROVER"
+        string department
+    }
+
+    PURCHASE_REQUEST {
+        int id PK
+        string prNumber UK "เช่น PR-00001"
+        string requesterName "ชื่อผู้ขอ (ข้อความธรรมดา)"
+        string department "แผนก (ข้อความธรรมดา)"
+        string status "DRAFT | PENDING | APPROVED | REJECTED"
+        string rejectReason "nullable"
+        int subtotal "สตางค์ (ยอดก่อน VAT)"
+        int vat "สตางค์ (VAT 7%)"
+        int total "สตางค์ (ยอดสุทธิ)"
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    PURCHASE_REQUEST_ITEM {
+        int id PK
+        int prId FK
+        string itemName
+        int quantity
+        int unitPrice "สตางค์ต่อหน่วย"
+    }
+
+    PURCHASE_REQUEST ||--|{ PURCHASE_REQUEST_ITEM : "มีหลายรายการ (ลบ PR = ลบรายการ)"
+    USER }o..o{ PURCHASE_REQUEST : "อ้างอิงด้วยชื่อ ไม่มี FK (ตาม assumption)"
